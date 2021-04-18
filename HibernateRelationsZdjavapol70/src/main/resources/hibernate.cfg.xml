@@ -17,5 +17,11 @@
         <mapping class="pl.sda.onetoone.Student"></mapping>
         <mapping class="pl.sda.onetoone.StudentIndex"></mapping>
 
+        <mapping class="pl.sda.onetomany.Client"></mapping>
+        <mapping class="pl.sda.onetomany.Order"></mapping>
+
+        <mapping class="pl.sda.manytomany.Child"></mapping>
+        <mapping class="pl.sda.manytomany.Parent"></mapping>
+
     </session-factory>
 </hibernate-configuration>

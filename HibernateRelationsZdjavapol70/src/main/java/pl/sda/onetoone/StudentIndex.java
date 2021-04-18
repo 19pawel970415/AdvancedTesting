@@ -18,6 +18,7 @@ public class StudentIndex {
     private String number;
 
     @OneToOne
+    @JoinColumn(name = "studentId")
     private Student student;
 
 }

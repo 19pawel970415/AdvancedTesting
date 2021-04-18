@@ -23,8 +23,7 @@ public class Student {
 
     private LocalDate birthDate;
 
-    @OneToOne
-    @JoinColumn(name = "indexId")
+    @OneToOne(mappedBy = "student") //jest case sensitive
     private StudentIndex studentIndex;
 
 

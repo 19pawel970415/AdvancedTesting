@@ -4,7 +4,7 @@
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
-        <property name="connection.url">jdbc:mysql://localhost:3306/relationszdjavapol70?serverTimezone=Europe/Warsaw</property>
+        <property name="connection.url">jdbc:mysql://localhost:3306/inheritancezdjavapol70?serverTimezone=Europe/Warsaw</property>
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
         <property name="dialect">org.hibernate.dialect.MySQL5Dialect</property>
         <property name="connection.username">root</property>
@@ -14,14 +14,18 @@
         <property name="show_sql">true</property>
         <property name="format_sql">true</property>
 
-        <mapping class="pl.sda.onetoone.Student"></mapping>
-        <mapping class="pl.sda.onetoone.StudentIndex"></mapping>
+        <mapping class="pl.sda.tableperclass.Employee"></mapping>
+        <mapping class="pl.sda.tableperclass.OfficeEmployee"></mapping>
+        <mapping class="pl.sda.tableperclass.Director"></mapping>
 
-        <mapping class="pl.sda.onetomany.Client"></mapping>
-        <mapping class="pl.sda.onetomany.Order"></mapping>
+        <mapping class="pl.sda.singletable.EmployeeV2"></mapping>
+        <mapping class="pl.sda.singletable.OfficeEmployeeV2"></mapping>
+        <mapping class="pl.sda.singletable.DirectorV2"></mapping>
 
-        <mapping class="pl.sda.manytomany.Child"></mapping>
-        <mapping class="pl.sda.manytomany.Parent"></mapping>
+        <mapping class="pl.sda.joined.EmployeeV3"></mapping>
+        <mapping class="pl.sda.joined.DirectorV3"></mapping>
+        <mapping class="pl.sda.joined.OfficeEmployeeV3"></mapping>
+
 
     </session-factory>
 </hibernate-configuration>
