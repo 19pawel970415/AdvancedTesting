@@ -26,5 +26,8 @@
         <mapping class="pl.sda.embedded.Mammal"></mapping>
         <mapping class="pl.sda.book.BookType"></mapping>
         <mapping class="pl.sda.book.Book"></mapping>
+
+        <mapping class="pl.sda.compositekeys.Account"></mapping>
+        <mapping class="pl.sda.mappedsuperclass.Movie"></mapping>
     </session-factory>
 </hibernate-configuration>
