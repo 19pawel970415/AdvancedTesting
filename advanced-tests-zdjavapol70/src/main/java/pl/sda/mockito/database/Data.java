@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder
 public class Data {
 
-    private UUID id;
+    private UUID id = UUID.randomUUID();
 
     private String value;
 }
