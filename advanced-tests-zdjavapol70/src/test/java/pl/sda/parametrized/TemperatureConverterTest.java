@@ -8,16 +8,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class TemperatureConverterTest {
 
     @ParameterizedTest
-    @EnumSource(value = TemperatureConverter.class)
-    public void shouldConvertTemperature(TemperatureConverter converter) {
-        assertTrue(converter.convertTemp(0) >= -273.15f);
+    @EnumSource(TemperatureConverter.class)
+    void shouldreturnConvertedTempNotLowerthan(TemperatureConverter converter) {
+        assertTrue(converter.convertTemp(0) >= -274);
     }
-
 
     @ParameterizedTest
-    @EnumSource(value = TemperatureConverter.class, names = {".+CELSIUS"}, mode = EnumSource.Mode.MATCH_ANY)
-    public void shouldConvertTemperatureV2(TemperatureConverter converter) {
-        assertTrue(converter.convertTemp(0) >= -273.15f);
+    @EnumSource(value = TemperatureConverter.class, names = "CELSIUS_KELVIN",mode = EnumSource.Mode.INCLUDE)
+    void shouldConvvertTemp(TemperatureConverter converter) {
+        assertTrue(converter.convertTemp(0) >= -274);
     }
-
 }

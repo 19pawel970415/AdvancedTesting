@@ -6,16 +6,14 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 
 import java.util.stream.Stream;
 
-public class NumberWithParityArgumentsProvider implements ArgumentsProvider {
-
-
+public class CalculatorArgumentsProviderForThree implements ArgumentsProvider {
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) throws Exception {
         return Stream.of(
-                Arguments.of(1, true),
-                Arguments.of(2, false),
-                Arguments.of(3, true),
-                Arguments.of(4, false)
+                Arguments.of(4, 12, 10),
+                Arguments.of(0, 88, 2),
+                Arguments.of(-1, 0, 1),
+                Arguments.of(-77, -5, -21)
         );
     }
 }

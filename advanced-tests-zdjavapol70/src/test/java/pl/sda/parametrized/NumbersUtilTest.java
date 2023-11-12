@@ -11,63 +11,54 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.*;
+
 class NumbersUtilTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1, 10111, 23535, 74543})
-    public void shouldReturnTrueForOddNumbers(int input) {
-        Assertions.assertTrue(NumbersUtil.isOdd(input));
+    void shouldReturnTrueForOddNumbers(int input) {
+        assertTrue(NumbersUtil.isOdd(input));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {12, 101112, 235352, 745432})
-    public void shouldReturnFalseForEvenNumbers(int input) {
-        Assertions.assertFalse(NumbersUtil.isOdd(input));
+    void shouldReturnFalseForEvenNumbers(int input) {
+        assertFalse(NumbersUtil.isOdd(input));
     }
 
-    private static Stream<Arguments> provideInfoWithNumbersParity() {
+    private static Stream getNumberAndOddBoolean() {
         return Stream.of(
                 Arguments.of(1, true),
-                Arguments.of(12, false),
-                Arguments.of(11, true),
-                Arguments.of(100, false)
+                Arguments.of(2, false),
+                Arguments.of(3, true),
+                Arguments.of(4, false)
         );
     }
 
     @ParameterizedTest
-    //given
-    @MethodSource(value = "provideInfoWithNumbersParity")
-    public void shouldReturnExpectedValueForInput(int input, boolean expected) {
-
-        //when
+    @MethodSource(value = "getNumberAndOddBoolean")
+    void shouldReturnFalseForEvenNumbersAndTrueForOddNumbersFromMethod(int input, boolean expectedIsOdd) {
         boolean actual = NumbersUtil.isOdd(input);
 
-        //then
-        Assertions.assertEquals(expected, actual);
-
+        assertEquals(expectedIsOdd, actual);
     }
 
     @ParameterizedTest
-    @ArgumentsSource(value = NumberWithParityArgumentsProvider.class)
-    public void shouldReturnExpectedValueForInputArgumentsSource(int input, boolean expected) {
-
-        //when
+    @ArgumentsSource(NumberWithParityArgumentsProvider.class)
+    void shouldReturnFalseForEvenNumbersAndTrueForOddNumbersFromClass(int input, boolean expectedIsOdd) {
         boolean actual = NumbersUtil.isOdd(input);
 
-        //then
-        Assertions.assertEquals(expected, actual);
-
+        assertEquals(expectedIsOdd, actual);
     }
 
     @Test
-    public void shouldThrowIllegalArgumentExceptionWhenDivideByZero() {
-
-        org.assertj.core.api.Assertions
-                .assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> NumbersUtil.divide(10, 0))
+    void shouldThrowIllegalArgumentExceptionWhenDevidedByZero() {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> NumbersUtil.divide(33, 0))
                 .withMessage("dividend can't be 0");
     }
-
-
 
 }
