@@ -9,31 +9,29 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class DataServiceImplTest {
+class DataRepositoryImplTest {
 
-    private static final Data DATA = new Data.DataBuilder().value("dane").build();
+    private static final Data DATA = new Data.DataBuilder().value("data").build();
 
     @Mock
     private DatabaseConnection databaseConnection;
 
     @Spy
-    private DataRepository dataRepository = new DataRepositoryImpl();
+    DataRepository dataRepository = new DataRepositoryImpl();
 
     @InjectMocks
-    private DataServiceImpl dataService;
+    DataServiceImpl dataServiceImpl;
 
     @Test
-    public void shouldAddDataForOpenedConnection() {
-        //given
+    void shouldAdd() {
         Mockito.when(databaseConnection.isOpened()).thenReturn(true);
 
-        //when
-        Data actual = dataService.add(DATA);
+        Data actual = dataServiceImpl.add(DATA);
 
-        //then
-        Assertions.assertThat(actual).isEqualTo(DATA);
+        assertEquals(DATA, actual);
         Mockito.verify(databaseConnection, Mockito.times(2)).isOpened();
         Mockito.verify(databaseConnection, Mockito.never()).open();
         Mockito.verify(databaseConnection).close();
@@ -41,9 +39,5 @@ class DataServiceImplTest {
 
         Mockito.verify(dataRepository).add(DATA);
         Mockito.verifyNoMoreInteractions(dataRepository);
-
     }
-
-    //pozostałe przypadki praca domowa
-
 }

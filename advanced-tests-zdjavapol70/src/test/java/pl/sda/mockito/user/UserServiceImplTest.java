@@ -1,7 +1,6 @@
 package pl.sda.mockito.user;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,64 +8,79 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
-    private static final long IDENTIFIER = 1L;
-    private static final User USER = new User(IDENTIFIER, "Jan", "Kowaski");
+    private static final long ID = 1L;
+    private static final User USER = new User();
 
     @Mock
-    private UserRepository userRepository;
+    UserRepository userRepository;
 
     @Mock
-    private UserValidator userValidator;
+    UserValidator userValidator;
 
     @InjectMocks
-    private UserServiceImpl userService;
+    UserServiceImpl userServiceImpl;
 
-//    @BeforeEach
-//    public void setUp() {
-//        userService = new UserServiceImpl(userRepository, userValidator);
-//    }
+    // W większości przypadków w testach nie musimy wywoływać metody verify i verifyNoMoreInteractions. Nasze zamodelowane zachowania są automatycznie weryfikowane przez mockito.
 
     @Test
-    public void shouldGetUserById() {
-        //given
-        Mockito.when(userRepository.findById(IDENTIFIER)).thenReturn(Optional.of(USER));
+    void shouldGetUserById() {
+        Mockito.when(userRepository.findById(ID)).thenReturn(Optional.of(USER));
 
-        //when
-        User actual = userService.getUserById(IDENTIFIER);
+        User actualUserById = userServiceImpl.getUserById(ID);
 
-        //then
-        Assertions.assertThat(actual).isEqualTo(USER);
-        Mockito.verify(userRepository).findById(IDENTIFIER);
+        assertEquals(actualUserById, USER);
+//        optional:
+//        Mockito.verify(userRepository).findById(ID);
+//        Mockito.verifyNoMoreInteractions(userRepository);
         Mockito.verifyNoInteractions(userValidator);
     }
 
-    //przypadek negatywny praca domowa
-
     @Test
-    public void shouldThrowIllegalArgumentExceptionWhenCreateInvalidUser() {
+    void shouldThrowExceptionWhenUserIdIsEmpty() {
+        Mockito.when(userRepository.findById(ID)).thenReturn(Optional.empty());
 
-        //given
-        Mockito.when(userValidator.isUserValid(USER)).thenReturn(false);
-
-        //when
-        //then
-        Assertions
-                .assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> userService.createUser(USER))
-                .withMessage("User is invalid");
-
-        Mockito.verify(userValidator).isUserValid(USER);
-        Mockito.verifyNoInteractions(userRepository);
-        Mockito.verifyNoMoreInteractions(userValidator);
+        assertThatExceptionOfType(NoSuchElementException.class)
+                .isThrownBy(() -> userServiceImpl.getUserById(ID))
+                .withMessage("No value present");
+//        optional:
+//        Mockito.verify(userRepository).findById(ID);
+//        Mockito.verifyNoMoreInteractions(userRepository);
+        Mockito.verifyNoInteractions(userValidator);
     }
 
-    //przypadek pozytywny praca domowa
+    @Test
+    void shouldCreateUser() {
+        Mockito.when(userValidator.isUserValid(USER)).thenReturn(true);
+        Mockito.when(userRepository.addUser(USER)).thenReturn(USER);
 
+        User actualUser = userServiceImpl.createUser(USER);
+
+        assertEquals(USER, actualUser);
+//        optional:
+//        Mockito.verify(userRepository).addUser(USER);
+//        Mockito.verifyNoMoreInteractions(userRepository);
+//        Mockito.verify(userValidator).isUserValid(USER);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCreateUserAndUserInvalid() {
+        Mockito.when(userValidator.isUserValid(USER)).thenReturn(false);
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> userServiceImpl.createUser(USER))
+                .withMessage("User is invalid");
+//        optional:
+//        Mockito.verify(userValidator).isUserValid(USER);
+//        Mockito.verifyNoMoreInteractions(userValidator);
+        Mockito.verifyNoInteractions(userRepository);
+    }
 }

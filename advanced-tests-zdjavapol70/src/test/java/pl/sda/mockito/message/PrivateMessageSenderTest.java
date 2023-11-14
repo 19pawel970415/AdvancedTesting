@@ -5,21 +5,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.sda.mockito.exception.SdaException;
 
 import java.time.LocalDateTime;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PrivateMessageSenderTest {
 
-    private static final String TEXT = "Hello";
-
-    private static final String AUTHOR_ID = "Andrzej123";
-
-    private static final String RECIPIENT_ID = "Anna321";
+    private static final String TEXT = "Hello there";
+    private static final String AUTHOR_ID = "1";
+    private static final String RECIPIENT_ID = "2";
 
     @Mock
     private MessageProvider messageProvider;
@@ -28,58 +28,68 @@ class PrivateMessageSenderTest {
     private MessageValidator messageValidator;
 
     @InjectMocks
-    private PrivateMessageSender messageSender;
-
-    @Captor
-    private ArgumentCaptor<Message> messageCaptor;
+    private PrivateMessageSender privateMessageSender;
 
     @Test
-    public void shouldSendPrivateMessage() {
-        //given
-        Mockito.when(messageValidator.isMessageValid(any())).thenReturn(true);
-        Mockito.when(messageValidator.isMessageRecipientReachable(RECIPIENT_ID)).thenReturn(true);
+    void shouldSendPrivateMessage() {
+        when(messageValidator.isMessageValid(any())).thenReturn(true);
+        when(messageValidator.isMessageRecipientReachable(RECIPIENT_ID)).thenReturn(true);
+        Mockito.doNothing().when(messageProvider).send(any(), eq(MessageType.PRIVATE));
 
-        Mockito.doNothing().when(messageProvider).send(any(Message.class), eq(MessageType.PRIVATE));
+        privateMessageSender.sendPrivateMessage(TEXT, AUTHOR_ID, RECIPIENT_ID);
 
-        //when
-        messageSender.sendPrivateMessage(TEXT, AUTHOR_ID, RECIPIENT_ID);
-
-        //then
-        Mockito.verify(messageValidator).isMessageValid(any());
+        Mockito.verify(messageValidator).isMessageValid((any()));
         Mockito.verify(messageValidator).isMessageRecipientReachable(RECIPIENT_ID);
         Mockito.verify(messageProvider).send(any(), eq(MessageType.PRIVATE));
     }
 
+    @Captor
+    ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
 
     @Test
-    public void shouldSendPrivateMessageWithArgumentCaptor() {
+    void shouldSendPrivateMessageCapturing() {
+        when(messageValidator.isMessageValid(any())).thenReturn(true);
+        when(messageValidator.isMessageRecipientReachable(RECIPIENT_ID)).thenReturn(true);
+        Mockito.doNothing().when(messageProvider).send(any(), eq(MessageType.PRIVATE));
 
-        //given
-        Mockito.when(messageValidator.isMessageValid(any())).thenReturn(true);
-        Mockito.when(messageValidator.isMessageRecipientReachable(RECIPIENT_ID)).thenReturn(true);
+        privateMessageSender.sendPrivateMessage(TEXT, AUTHOR_ID, RECIPIENT_ID);
 
-        Mockito.doNothing().when(messageProvider).send(any(Message.class), eq(MessageType.PRIVATE));
-
-        //when
-        messageSender.sendPrivateMessage(TEXT, AUTHOR_ID, RECIPIENT_ID);
-
-        //then
-        Mockito.verify(messageValidator).isMessageValid(messageCaptor.capture());
+        Mockito.verify(messageValidator).isMessageValid(messageArgumentCaptor.capture());
         Mockito.verify(messageValidator).isMessageRecipientReachable(RECIPIENT_ID);
-        Mockito.verify(messageProvider).send(messageCaptor.capture(), eq(MessageType.PRIVATE));
+        Mockito.verify(messageProvider).send(messageArgumentCaptor.capture(), eq(MessageType.PRIVATE));
 
-        for (Message message : messageCaptor.getAllValues()) {
-            Assertions.assertEquals(TEXT, message.getValue());
-            Assertions.assertEquals(AUTHOR_ID, message.getAuthor());
-            Assertions.assertEquals(RECIPIENT_ID, message.getRecipent());
-            Assertions.assertNotNull(message.getId());
-            Assertions.assertNotNull(message.getSendAt());
-            Assertions.assertTrue(message.getSendAt().isBefore(LocalDateTime.now()));
+        for (Message message : messageArgumentCaptor.getAllValues()) {
+            assertNotNull(message.getId());
+            assertEquals(TEXT, message.getValue());
+            assertNotNull(message.getSendAt());
+            assertEquals(AUTHOR_ID, message.getAuthor());
+            assertEquals(RECIPIENT_ID, message.getRecipent());
         }
-
     }
 
-    //przypadek negatywny praca domowa
+    @Test
+    void shouldThrowExceptionWhenSendPrivateMessageRecipientNotReachable() {
+        when(messageValidator.isMessageValid(any())).thenReturn(true);
+        when(messageValidator.isMessageRecipientReachable(RECIPIENT_ID)).thenReturn(false);
 
+        assertThatExceptionOfType(SdaException.class)
+                .isThrownBy(() -> privateMessageSender.sendPrivateMessage(TEXT, AUTHOR_ID, RECIPIENT_ID))
+                .withMessage("Cannot send private message. Validation failed");
 
+        Mockito.verify(messageValidator).isMessageValid(any());
+        Mockito.verify(messageValidator).isMessageRecipientReachable(RECIPIENT_ID);
+        Mockito.verifyNoInteractions(messageProvider);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenSendPrivateMessageNotValid() {
+        when(messageValidator.isMessageValid(any())).thenReturn(false);
+
+        assertThatExceptionOfType(SdaException.class)
+                .isThrownBy(() -> privateMessageSender.sendPrivateMessage(TEXT, AUTHOR_ID, RECIPIENT_ID))
+                .withMessage("Cannot send private message. Validation failed");
+
+        Mockito.verify(messageValidator).isMessageValid(any());
+        Mockito.verifyNoInteractions(messageProvider);
+    }
 }
